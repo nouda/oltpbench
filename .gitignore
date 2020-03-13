@@ -1,3 +1,13 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+log4j.log
+.idea/
+*.iml
+
 bin/
 /build/
 output.raw
@@ -18,6 +28,3 @@ results
 ## -------------------------------
 ~*
 *~
-
-# maven output
-target
