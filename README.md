@@ -1,16 +1,17 @@
 # OLTPBench for Polypheny-FRAM
 
-[![Build Status](https://travis-ci.org/nouda/oltpbench.svg?branch=polypheny-fram)](https://travis-ci.org/nouda/oltpbench)
+[![GitHub CI](https://img.shields.io/github/workflow/status/nouda/oltpbench/CI/polypheny-fram?label=CI&logo=GitHub&logoColor=white)](https://github.com/nouda/oltpbench/actions?query=workflow%3ACI)
+[![OLTPBench Build Status](https://img.shields.io/travis/nouda/oltpbench/polypheny-fram.svg?label=OLTPBench%20CI)](https://travis-ci.org/nouda/oltpbench)
 
 This repository contains a fork of the [OLTPBenchmark](https://github.com/oltpbenchmark/oltpbench/) framework made ready to benchmark [Polypheny-FRAM](https://github.com/polypheny/Polypheny-FRAM).
 Further, the build process is now performed using Gradle instead of ANT.
 
-### Dependencies
+### Build Dependencies
 * Java 1.8 or later
 
 ### Usage
-To build this fork, use `./gradlew assemble`. The archives of the OLTPBenchmark application can be found in `build/distributions`. Extract the application on the machine of your choice, switch into the extracted folder, run `./bin/oltpbenchmark ...` and happy benchmarking.
-> Alternatively: Use `./gradlew installDist` to create the folder `dist` containing the application. 
+To build this fork, use `./gradlew zipAll`. The archives of the OLTPBenchmark application can be found in `build/distributions`. Extract the application on the machine of your choice, switch into the extracted folder, run `./bin/oltpbenchmark ...` and happy benchmarking.
+> Alternatively: Use `./gradlew runtime` to create the distribution folders in `build/distributions` containing the application and the custom JRE image. 
 
 Please consult the documentation of the original repository on how to further use OLTPBenchmark: [oltpbench/wiki](https://github.com/oltpbenchmark/oltpbench/wiki).
 
