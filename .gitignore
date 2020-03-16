@@ -3,6 +3,7 @@
 
 # Ignore Gradle build output directory
 build
+dist
 
 log4j.log
 .idea/
@@ -16,6 +17,7 @@ output.res
 .settings
 .idea
 results
+out
 
 ## -------------------------------
 ## Kate Swap Files

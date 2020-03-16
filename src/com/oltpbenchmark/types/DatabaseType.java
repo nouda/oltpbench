@@ -52,21 +52,23 @@ public enum DatabaseType {
     CASSANDRA("com.github.adejanovski.cassandra.jdbc.CassandraDriver", true, true, false),
     MEMSQL("com.mysql.jdbc.Driver", true, false, false),
     NOISEPAGE("org.postgresql.Driver", false, false, true),
+    AVATICA("org.apache.calcite.avatica.remote.Driver", false, false, true),
+    POLYPHENY("org.polypheny.jdbc.Driver", false, false, true),
     ;
-    
-    private DatabaseType(String driver,
-                         boolean escapeNames,
-                         boolean includeColNames,
-                         boolean supportTxns) {
+
+    DatabaseType(String driver,
+                 boolean escapeNames,
+                 boolean includeColNames,
+                 boolean supportTxns) {
         this.driver = driver;
         this.escapeNames = escapeNames;
         this.includeColNames = includeColNames;
         this.supportTxns = supportTxns;
     }
-    
+
     /**
      * This is the suggested driver string to use in the configuration xml
-     * This corresponds to the <B>'driver'</b> attribute. 
+     * This corresponds to the <B>'driver'</b> attribute.
      */
     private final String driver;
     
