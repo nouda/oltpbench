@@ -20,7 +20,8 @@
             <serial>false</serial>
             <time>10</time>
             <rate>10000</rate>
-            <weights>45,43,4,4,4</weights>
+            <!--<weights>45,43,4,4,4</weights>-->
+            <weights>46,44,5,5<!--,0--></weights>
         </work>
     </works>
 
@@ -38,8 +39,8 @@
         <transactiontype>
             <name>Delivery</name>
         </transactiontype>
-        <transactiontype>
+        <!--<transactiontype>
             <name>StockLevel</name>
-        </transactiontype>
+        </transactiontype>-->
     </transactiontypes>
 </parameters>
