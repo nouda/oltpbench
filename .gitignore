@@ -1,3 +1,14 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+dist
+
+log4j.log
+.idea/
+*.iml
+
 bin/
 /build/
 output.raw
@@ -6,6 +17,7 @@ output.res
 .settings
 .idea
 results
+out
 
 ## -------------------------------
 ## Kate Swap Files
@@ -18,6 +30,3 @@ results
 ## -------------------------------
 ~*
 *~
-
-# maven output
-target

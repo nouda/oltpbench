@@ -17,22 +17,6 @@
 
 package com.oltpbenchmark.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.oltpbenchmark.WorkloadConfiguration;
 import com.oltpbenchmark.api.Loader.LoaderThread;
 import com.oltpbenchmark.catalog.Catalog;
@@ -41,6 +25,16 @@ import com.oltpbenchmark.types.DatabaseType;
 import com.oltpbenchmark.util.ClassUtil;
 import com.oltpbenchmark.util.ScriptRunner;
 import com.oltpbenchmark.util.ThreadUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Base class for all benchmark implementations
@@ -169,59 +163,65 @@ public abstract class BenchmarkModule {
     /**
      * Return the URL handle to the DDL used to load the benchmark's database
      * schema.
+     *
      * @param conn
      * @throws SQLException
      */
     public URL getDatabaseDDL(DatabaseType db_type) {
-        String ddlNames[] = {
-            this.benchmarkName + "-" + (db_type != null ? db_type.name().toLowerCase() : "") + "-ddl.sql",
-            this.benchmarkName + "-ddl.sql",
+        String[] ddlNames = {
+                this.benchmarkName + "-" + (db_type != null ? db_type.name().toLowerCase() : "") + "-ddl.sql",
+                this.benchmarkName + "-ddl.sql",
         };
 
         for (String ddlName : ddlNames) {
             if (ddlName == null) continue;
             URL ddlURL = this.getClass().getResource(DDLS_DIR + File.separator + ddlName);
+            if (ddlURL == null) ddlURL = this.getClass().getResource(DDLS_DIR + '/' + ddlName);
             if (ddlURL != null) {
                 if (LOG.isDebugEnabled())
-                    LOG.debug("Found DDL file for " + db_type + ": " + ddlURL );
+                    LOG.debug("Found DDL file for " + db_type + ": " + ddlURL);
                 return ddlURL;
             }
         } // FOR
-        LOG.trace(ddlNames[0]+" :or: "+ddlNames[1]);
+        LOG.trace(ddlNames[0] + " :or: " + ddlNames[1]);
         LOG.error("Failed to find DDL file for " + this.benchmarkName);
         return null;
     }
 
     /**
-     *
      * @return
      */
 
-    public File getSQLDialect(){
+    public File getSQLDialect() {
         return (this.getSQLDialect(this.workConf.getDBType()));
     }
 
     /**
      * Return the File handle to the SQL Dialect XML file
      * used for this benchmark
+     *
      * @return
      */
     public File getSQLDialect(DatabaseType db_type) {
 
         // String xmlName = this.benchmarkName + "-dialects.xml";
         // URL ddlURL = this.getClass().getResource(xmlName);
-        String xmlNames[] = {
-            (db_type != null ? db_type.name().toLowerCase() : "") + "-dialects.xml",
+        String[] xmlNames = {
+                (db_type != null ? db_type.name().toLowerCase() : "") + "-dialects.xml",
 
-            // TODO: We need to remove this!
-            this.benchmarkName + "-dialects.xml",
+                // TODO: We need to remove this!
+                this.benchmarkName + "-dialects.xml",
         };
-        for(String xmlName : xmlNames) {
-            URL ddlURL = this.getClass().getResource( DIALECTS_DIR + File.separator + xmlName);
+        for (String xmlName : xmlNames) {
+            URL ddlURL = this.getClass().getResource(DIALECTS_DIR + File.separator + xmlName);
+            if (ddlURL == null) ddlURL = this.getClass().getResource(DIALECTS_DIR + '/' + xmlName);
             if (ddlURL != null) {
                 try {
-                    return new File(ddlURL.toURI().getPath());
-                } catch (URISyntaxException e) {
+                    final File dialect = File.createTempFile(xmlName, null);
+                    dialect.deleteOnExit();
+                    FileUtils.copyInputStreamToFile(ddlURL.openStream(), dialect);
+                    return dialect;
+                } catch (IOException e) {
                     e.printStackTrace();
                     if (LOG.isDebugEnabled())
                         LOG.warn(String.format("Failed to find SQL Dialect XML file '%s'", xmlName));
@@ -258,7 +258,7 @@ public abstract class BenchmarkModule {
     public final void createDatabase(DatabaseType dbType, Connection conn) throws SQLException {
         try {
             URL ddl = this.getDatabaseDDL(dbType);
-            assert(ddl != null) : "Failed to get DDL for " + this;
+            assert (ddl != null) : "Failed to get DDL for " + this;
             ScriptRunner runner = new ScriptRunner(conn, true, true);
             if (LOG.isDebugEnabled()) LOG.debug("Executing script '" + ddl + "'");
             runner.runScript(ddl);
@@ -274,7 +274,7 @@ public abstract class BenchmarkModule {
         try {
             Connection conn = this.makeConnection();
             ScriptRunner runner = new ScriptRunner(conn, true, true);
-            File scriptFile= new File(script);
+            File scriptFile = new File(script);
             runner.runScript(scriptFile.toURI().toURL());
             conn.close();
         } catch (SQLException ex) {
@@ -289,6 +289,7 @@ public abstract class BenchmarkModule {
      * We return the handle to Loader object that we created to do this.
      * You probably don't need it and can simply ignore. There are some
      * test cases that use it. That's why it's here.
+     *
      * @return
      */
     public final Loader<? extends BenchmarkModule> loadDatabase() {
@@ -324,12 +325,12 @@ public abstract class BenchmarkModule {
             }
         } catch (SQLException ex) {
             String msg = String.format("Unexpected error when trying to load the %s database",
-                                       this.benchmarkName.toUpperCase());
+                    this.benchmarkName.toUpperCase());
             throw new RuntimeException(msg, ex);
         }
         if (LOG.isDebugEnabled())
             LOG.debug(String.format("Finished loading the %s database",
-                                    this.getBenchmarkName().toUpperCase()));
+                    this.getBenchmarkName().toUpperCase()));
         return (loader);
     }
 
@@ -360,12 +361,14 @@ public abstract class BenchmarkModule {
     public final String getBenchmarkName() {
         return (this.benchmarkName);
     }
+
     /**
      * Return the database's catalog
      */
     public final Catalog getCatalog() {
         return (this.catalog);
     }
+
     /**
      * Get the catalog object for the given table name
      *
@@ -384,6 +387,7 @@ public abstract class BenchmarkModule {
     public final StatementDialects getStatementDialects() {
         return (this.dialects);
     }
+
     @Override
     public final String toString() {
         return benchmarkName.toUpperCase();
@@ -393,6 +397,7 @@ public abstract class BenchmarkModule {
     /**
      * Initialize a TransactionType handle for the get procedure name and id
      * This should only be invoked a start-up time
+     *
      * @param procName
      * @param id
      * @return
@@ -420,6 +425,7 @@ public abstract class BenchmarkModule {
 
     /**
      * Return a mapping from TransactionTypes to Procedure invocations
+     *
      * @param txns
      * @param pkg
      * @return
@@ -438,7 +444,7 @@ public abstract class BenchmarkModule {
             } // FOR
 
             for (TransactionType txn : txns) {
-                Procedure proc = (Procedure)ClassUtil.newInstance(txn.getProcedureClass(),
+                Procedure proc = ClassUtil.newInstance(txn.getProcedureClass(),
                         new Object[0],
                         new Class<?>[0]);
                 proc.initialize(this.workConf.getDBType());

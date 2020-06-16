@@ -11,9 +11,10 @@ cache:
 # openjdk9 + oraclejdk10 were both removed from Ubuntu
 language: java
 jdk:
+  - openjdk11
   - openjdk10
   - openjdk8
-  - oraclejdk8
+#  - oraclejdk8
 
 #matrix:
 #  allow_failures:
