@@ -100,6 +100,7 @@ public abstract class BenchmarkModule {
     // --------------------------------------------------------------------------
 
     /**
+     *
      * @return
      * @throws SQLException
      */
@@ -152,6 +153,7 @@ public abstract class BenchmarkModule {
     }
 
     /**
+     *
      * @return
      */
     public URL getDatabaseDDL() {
@@ -297,17 +299,27 @@ public abstract class BenchmarkModule {
             if (loader != null) {
                 List<? extends LoaderThread> loaderThreads = loader.createLoaderThreads();
                 if (loaderThreads != null) {
-                    int maxConcurrent = workConf.getLoaderThreads();
-                    assert (maxConcurrent > 0);
-                    if (LOG.isDebugEnabled())
-                        LOG.debug(String.format("Starting %d %s.LoaderThreads [maxConcurrent=%d]",
-                                loaderThreads.size(),
-                                loader.getClass().getSimpleName(),
-                                maxConcurrent));
-                    ThreadUtil.runNewPool(loaderThreads, maxConcurrent);
+                    try{
+                        int maxConcurrent = workConf.getLoaderThreads();
+                        assert (maxConcurrent > 0);
+                        if (LOG.isDebugEnabled())
+                            LOG.debug(String.format("Starting %d %s.LoaderThreads [maxConcurrent=%d]",
+                                    loaderThreads.size(),
+                                    loader.getClass().getSimpleName(),
+                                    maxConcurrent));
+                        ThreadUtil.runNewPool(loaderThreads, maxConcurrent);
 
-                    if (loader.getTableCounts().isEmpty() == false) {
-                        LOG.info("Table Counts:\n" + loader.getTableCounts());
+                        if (loader.getTableCounts().isEmpty() == false) {
+                            LOG.info("Table Counts:\n" + loader.getTableCounts());
+                        }
+                    } catch (Exception ex){
+                        String msg = String.format("Unexpected error when trying to load the %s database",
+                                this.benchmarkName.toUpperCase());
+                        throw new RuntimeException(msg, ex);
+                    } finally {
+                        for (LoaderThread t : loaderThreads) {
+                            t.getConnection().close();
+                        }
                     }
                 }
             }
@@ -447,6 +459,7 @@ public abstract class BenchmarkModule {
     }
 
     /**
+     *
      * @param procClass
      */
     public final void registerSupplementalProcedure(Class<? extends Procedure> procClass) {
