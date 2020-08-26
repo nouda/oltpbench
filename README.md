@@ -1,9 +1,6 @@
-# OLTPBench for Polypheny-FRAM
+# OLTPBench for Polypheny-DB
 
-[![GitHub CI](https://img.shields.io/github/workflow/status/nouda/oltpbench/CI/polypheny-fram?label=CI&logo=GitHub&logoColor=white)](https://github.com/nouda/oltpbench/actions?query=workflow%3ACI)
-[![OLTPBench Build Status](https://img.shields.io/travis/nouda/oltpbench/polypheny-fram.svg?label=OLTPBench%20CI)](https://travis-ci.org/nouda/oltpbench)
-
-This repository contains a fork of the [OLTPBenchmark](https://github.com/oltpbenchmark/oltpbench/) framework made ready to benchmark [Polypheny-FRAM](https://github.com/polypheny/Polypheny-FRAM).
+This repository contains a fork of the [OLTPBenchmark](https://github.com/oltpbenchmark/oltpbench/) framework made ready to benchmark [Polypheny-DB](https://github.com/polypheny/Polypheny-DB).
 Further, the build process is now performed using Gradle instead of ANT.
 
 ### Build Dependencies
@@ -15,7 +12,7 @@ To build this fork, use `./gradlew zipAll`. The archives of the OLTPBenchmark ap
 
 Please consult the documentation of the original repository on how to further use OLTPBenchmark: [oltpbench/wiki](https://github.com/oltpbenchmark/oltpbench/wiki).
 
-### Supported Benchmarks for Polypheny-FRAM
+### Supported Benchmarks for Polypheny-DB
 * [TPC-C](./config/polypheny/tpcc.xml)\
   `./bin/oltpbenchmark -b tpcc -c ./config/polypheny/tpcc.xml --create=true --load=true --execute=true`
 * [YCSB](./config/polypheny/ycsb.xml)\
