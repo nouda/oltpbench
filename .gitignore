@@ -9,6 +9,8 @@ log4j.log
 .idea/
 *.iml
 
+.DS_Store
+
 bin/
 /build/
 output.raw

@@ -6,6 +6,8 @@
 
     <driver>org.polypheny.jdbc.Driver</driver>
     <DBUrl>jdbc:polypheny://localhost/</DBUrl>
+    <username>pa</username>
+    <password></password>
 
     <isolation>TRANSACTION_SERIALIZABLE</isolation>
     <batchsize>128</batchsize>
