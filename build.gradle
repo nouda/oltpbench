@@ -9,7 +9,7 @@ plugins {
 }
 
 
-// Polypheny-FRAM Fork
+// Polypheny-DB Fork
 version = "${rootProject.version_major}.${rootProject.version_minor}.${rootProject.version_patch}" + (rootProject.hasProperty('isRelease') ? '' : '-SNAPSHOT')
 
 
@@ -148,6 +148,7 @@ def adoptOpenJdk11FileVersionString = "11.${jdk11Minor}.${jdk11Update}_${jdk11Bu
 
 def standaloneJdk11Linux64 = "${rootProject.name}-${version}-jdk11-linux64"
 def standaloneJdk11Windows64 = "${rootProject.name}-${version}-jdk11-windows64"
+def standaloneJdk11Mac64 = "${rootProject.name}-${version}-jdk11-mac64"
 
 task jdk11_downloadJdkLinux64tar(type: Download) {
     def jdkLinux = file("${buildDir}/jdks/jdk-11-linux64.tar.gz")
@@ -175,6 +176,23 @@ task jdk11_downloadJdkWindows64(type: Download) {
     overwrite false
 }
 
+task jdk11_downloadJdkMac64tar(type: Download) {
+    def jdkMac = file("${buildDir}/jdks/jdk-11-mac64.tar.gz")
+    outputs.file jdkMac
+
+    src "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/${adoptOpenJdk11FolderVersionString}/OpenJDK11U-jdk_x64_mac_hotspot_${adoptOpenJdk11FileVersionString}.tar.gz"
+    dest jdkMac
+    overwrite false
+}
+
+task jdk11_downloadJdkMac64(type: Zip, dependsOn: jdk11_downloadJdkMac64tar) {
+    def jdkMac = file("${buildDir}/jdks/jdk-11-mac64.zip")
+    outputs.file jdkMac
+
+    from tarTree(jdk11_downloadJdkMac64tar.dest)
+    archiveFile.set jdkMac
+}
+
 task jdk11_unzipJdkLinux64(type: Copy, dependsOn: jdk11_downloadJdkLinux64) {
     def zipFile = file("${buildDir}/jdks/jdk-11-linux64.zip")
     def outputDir = file("${buildDir}/jdks/jdk-11-linux64")
@@ -186,6 +204,14 @@ task jdk11_unzipJdkLinux64(type: Copy, dependsOn: jdk11_downloadJdkLinux64) {
 task jdk11_unzipJdkWindows64(type: Copy, dependsOn: jdk11_downloadJdkWindows64) {
     def zipFile = file("${buildDir}/jdks/jdk-11-windows64.zip")
     def outputDir = file("${buildDir}/jdks/jdk-11-windows64")
+
+    from zipTree(zipFile)
+    into outputDir
+}
+
+task jdk11_unzipJdkMac64(type: Copy, dependsOn: jdk11_downloadJdkMac64) {
+    def zipFile = file("${buildDir}/jdks/jdk-11-mac64.zip")
+    def outputDir = file("${buildDir}/jdks/jdk-11-mac64")
 
     from zipTree(zipFile)
     into outputDir
@@ -229,7 +255,7 @@ startScripts {
 runtime {
     imageDir = file(distributionsDir)
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    javaHome = org.gradle.internal.os.OperatingSystem.current().isWindows() ? "${buildDir}/jdks/jdk-11-windows64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}" : "${buildDir}/jdks/jdk-11-linux64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}"
+    javaHome = org.gradle.internal.os.OperatingSystem.current().isWindows() ? "${buildDir}/jdks/jdk-11-windows64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}" : org.gradle.internal.os.OperatingSystem.current().isMacOsX() ? "${buildDir}/jdks/jdk-11-mac64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}/Contents/Home/" : "${buildDir}/jdks/jdk-11-linux64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}"
 
     modules = [
             'java.base',
@@ -248,8 +274,9 @@ runtime {
 
     targetPlatform("${standaloneJdk11Linux64.replaceFirst("${rootProject.name}-", '')}", "${buildDir}/jdks/jdk-11-linux64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}")
     targetPlatform("${standaloneJdk11Windows64.replaceFirst("${rootProject.name}-", '')}", "${buildDir}/jdks/jdk-11-windows64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}")
+    targetPlatform("${standaloneJdk11Mac64.replaceFirst("${rootProject.name}-", '')}", "${buildDir}/jdks/jdk-11-mac64/jdk-11.${jdk11Minor}.${jdk11Update}+${jdk11Build}/Contents/Home/")
 }
-tasks.runtime.dependsOn jdk11_unzipJdkWindows64, jdk11_unzipJdkLinux64
+tasks.runtime.dependsOn jdk11_unzipJdkWindows64, jdk11_unzipJdkLinux64, jdk11_unzipJdkMac64
 
 task jdk11_zipLinux64Package(type: Zip, group: 'distribution', dependsOn: tasks.runtime) {
     from(distributionsDir) {
@@ -265,8 +292,15 @@ task jdk11_zipWindows64Package(type: Zip, group: 'distribution', dependsOn: task
     archiveFile.set file("${distributionsDir}/${standaloneJdk11Windows64}.zip")
 }
 
+task jdk11_zipMac64Package(type: Zip, group: 'distribution', dependsOn: tasks.runtime) {
+    from(distributionsDir) {
+        include "${standaloneJdk11Mac64}/**"
+    }
+    archiveFile.set file("${distributionsDir}/${standaloneJdk11Mac64}.zip")
+}
+
 task jdk11_zipAll(group: 'distribution') {
-    dependsOn jdk11_zipLinux64Package, jdk11_zipWindows64Package
+    dependsOn jdk11_zipLinux64Package, jdk11_zipWindows64Package, jdk11_zipMac64Package
 }
 
 task zipAll(group: 'distribution') {
