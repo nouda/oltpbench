@@ -19,8 +19,8 @@
     <terminals>1</terminals>
     <works>
         <work>
-            <serial>false</serial>
-            <time>10</time>
+            <!-- <serial>false</serial> -->
+            <time>60</time>
             <rate>unlimited</rate>
             <!--<weights>45,43,4,4,4</weights>-->
             <!--<weights>46,44,5,5</weights> -->
