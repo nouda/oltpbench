@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<parameters>
+
+    <!-- Connection details -->
+    <dbtype>POLYPHENY</dbtype>
+
+    <driver>org.polypheny.jdbc.Driver</driver>
+    <DBUrl>jdbc:polypheny://localhost/</DBUrl>
+    <username>pa</username>
+    <password></password>
+
+    <isolation>TRANSACTION_SERIALIZABLE</isolation>
+    <batchsize>128</batchsize>
+
+    <!-- Scale factor is the number of warehouses in TPCC -->
+    <scalefactor>1</scalefactor>
+
+    <!-- The workload -->
+    <terminals>1</terminals>
+    <works>
+        <work>
+            <!-- <serial>false</serial> -->
+            <time>60</time>
+            <rate>unlimited</rate>
+            <!--<weights>45,43,4,4,4</weights>-->
+            <!--<weights>46,44,5,5</weights> -->
+            <weights>45,43,4,4,4</weights>
+        </work>
+    </works>
+
+    <!-- TPCC specific -->
+    <transactiontypes>
+        <transactiontype>
+            <name>NewOrder</name>
+        </transactiontype>
+        <transactiontype>
+            <name>Payment</name>
+        </transactiontype>
+        <transactiontype>
+            <name>OrderStatus</name>
+        </transactiontype>
+        <transactiontype>
+            <name>Delivery</name>
+        </transactiontype>
+        <transactiontype>
+            <name>StockLevel</name>
+        </transactiontype>
+    </transactiontypes>
+</parameters>
