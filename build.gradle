@@ -9,7 +9,7 @@ plugins {
 }
 
 
-// Polypheny-DB Fork
+// Polypheny Fork
 version = "${rootProject.version_major}.${rootProject.version_minor}.${rootProject.version_patch}" + (rootProject.hasProperty('isRelease') ? '' : '-SNAPSHOT')
 
 

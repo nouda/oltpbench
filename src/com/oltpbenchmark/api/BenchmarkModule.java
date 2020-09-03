@@ -244,7 +244,9 @@ public abstract class BenchmarkModule {
         try {
             Connection conn = this.makeConnection();
             this.createDatabase(this.workConf.getDBType(), conn);
-            conn.commit();
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
             conn.close();
         } catch (SQLException ex) {
             throw new RuntimeException(String.format("Unexpected error when trying to create the %s database", this.benchmarkName), ex);
@@ -277,7 +279,9 @@ public abstract class BenchmarkModule {
             ScriptRunner runner = new ScriptRunner(conn, true, true);
             File scriptFile = new File(script);
             runner.runScript(scriptFile.toURI().toURL());
-            conn.commit();
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
             conn.close();
         } catch (SQLException ex) {
             throw new RuntimeException(String.format("Unexpected error when trying to run: %s", script), ex);
@@ -320,8 +324,10 @@ public abstract class BenchmarkModule {
                         throw new RuntimeException(msg, ex);
                     } finally {
                         for (LoaderThread t : loaderThreads) {
-                        	t.getConnection().commit();
-                        	t.getConnection().close();
+                            if (!t.getConnection().getAutoCommit()) {
+                                t.getConnection().commit();
+                            }
+                            t.getConnection().close();
                         }
                     }
                 }

@@ -16,9 +16,9 @@ To build this fork, use `./gradlew zipAll`. The archives of the OLTPBenchmark ap
 Please consult the documentation of the original repository on how to further use OLTPBenchmark: [oltpbench/wiki](https://github.com/oltpbenchmark/oltpbench/wiki).
 
 ### Supported Benchmarks for Polypheny
-* [TPC-C](./config/polypheny/tpcc.xml)\
+* [TPC-C](./config/polypheny-{db|fram}/tpcc.xml)\
   `./bin/oltpbenchmark -b tpcc -c ./config/polypheny/tpcc.xml --create=true --load=true --execute=true`
-* [YCSB](./config/polypheny/ycsb.xml)\
+* [YCSB](./config/polypheny-{db|fram}/ycsb.xml)\
   `./bin/oltpbenchmark -b ycsb -c ./config/polypheny/ycsb.xml --create=true --load=true --execute=true`
 
 
