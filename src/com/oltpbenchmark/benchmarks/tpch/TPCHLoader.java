@@ -402,7 +402,7 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
                     return;
                 }
             }
-        }, "TPCH-Generator");
+        }, "tpch-dbgen (TPC-H Database Generator)");
 
         try {
             generator.start();
