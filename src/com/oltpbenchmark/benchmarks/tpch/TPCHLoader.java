@@ -338,9 +338,17 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
                         + " have a valid fileFormat" );
             }
 
-            final URL dbgenExeUrl = TPCHLoader.class.getResource( '/' + "bin" + '/' + "tpch-dbgen" + '-' + fileFormat + '.' + (SystemUtils.IS_OS_WINDOWS ? "windows" : "linux") );
+            final String platform;
+            if ( SystemUtils.IS_OS_WINDOWS ) {
+                platform = "windows";
+            } else if ( SystemUtils.IS_OS_MAC) {
+                platform = "macos";
+            } else {
+                platform = "linux";
+            }
+            final URL dbgenExeUrl = TPCHLoader.class.getResource( '/' + "bin" + '/' + "tpch-dbgen" + '-' + fileFormat + '.' + platform );
             if ( dbgenExeUrl == null ) {
-                LOG.error( "Failed to find tpch-dbgen" + '-' + fileFormat + '.' + (SystemUtils.IS_OS_WINDOWS ? "windows" : "linux") );
+                LOG.error( "Failed to find tpch-dbgen" + '-' + fileFormat + '.' + platform );
                 return;
             }
             LOG.debug( "Found tpch-dbgen: " + dbgenExeUrl );
@@ -353,7 +361,7 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
             } catch ( IOException e ) {
                 e.printStackTrace();
                 if ( LOG.isDebugEnabled() ) {
-                    LOG.error( "Failed to extract tpch-dbgen" + '-' + fileFormat + '.' + (SystemUtils.IS_OS_WINDOWS ? "windows" : "linux") );
+                    LOG.error( "Failed to extract tpch-dbgen" + '-' + fileFormat + '.' + platform );
                 }
                 return;
             }
