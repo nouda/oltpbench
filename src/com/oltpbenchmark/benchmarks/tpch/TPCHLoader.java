@@ -413,31 +413,27 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
 
 //        deactivateForeignKeyConstraints(conn);
 
-        startAndAwaitFinish(loadRegions(conn), loadParts(conn));
-        startAndAwaitFinish(loadNations(conn));
-        startAndAwaitFinish(loadCustomers(conn), loadSuppliers(conn));
-        startAndAwaitFinish(loadOrders(conn), loadPartSupps(conn));
-        startAndAwaitFinish(loadLineItems(conn));
+        startAndAwaitFinish( loadParts( conn ) );
+        startAndAwaitFinish( loadRegions( conn ) );
+        startAndAwaitFinish( loadNations( conn ) );
+        startAndAwaitFinish( loadCustomers( conn ) );
+        startAndAwaitFinish( loadSuppliers( conn ) );
+        startAndAwaitFinish( loadOrders( conn ) );
+        startAndAwaitFinish( loadPartSupps( conn ) );
+        startAndAwaitFinish( loadLineItems( conn ) );
 
 //        activateForeignKeyConstraints(conn);
 
         return this.totalRows;
     }
 
-    private void startAndAwaitFinish(Thread... loaders) {
-        for (Thread loader : loaders) {
-            if (loader != null) {
-                loader.start();
-            }
-        }
-        for (Thread loader : loaders) {
-            try {
-                if (loader != null) {
-                    loader.join();
-                }
-            } catch (InterruptedException e) {
-                LOG.error(e.getMessage());
-            }
+
+    private void startAndAwaitFinish( Thread loader ) {
+        loader.start();
+        try {
+            loader.join();
+        } catch ( InterruptedException e ) {
+            LOG.error( e.getMessage() );
         }
     }
 
