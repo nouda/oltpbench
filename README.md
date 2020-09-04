@@ -1,7 +1,7 @@
 # OLTPBench for Polypheny
 
 [![GitHub CI](https://img.shields.io/github/workflow/status/polypheny/OLTPBench/CI/polypheny?label=CI&logo=GitHub&logoColor=white)](https://github.com/polypheny/OLTPBench/actions?query=workflow%3ACI)
-[![OLTPBench Build Status](https://img.shields.io/travis/polypheny/OLTPBench/polypheny.svg?label=OLTPBench%20CI)](https://travis-ci.org/polypheny/OLTPBench)
+[![OLTPBench Build Status](https://img.shields.io/travis/polypheny/OLTPBench/polypheny.svg?label=OLTPBench%20CI)](https://travis-ci.org/github/polypheny/OLTPBench)
 
 This repository contains a fork of the [OLTPBenchmark](https://github.com/oltpbenchmark/oltpbench/) framework made ready to benchmark [Polypheny](https://github.com/polypheny).
 Further, the build process is now performed using Gradle instead of ANT.
@@ -16,11 +16,27 @@ To build this fork, use `./gradlew zipAll`. The archives of the OLTPBenchmark ap
 Please consult the documentation of the original repository on how to further use OLTPBenchmark: [oltpbench/wiki](https://github.com/oltpbenchmark/oltpbench/wiki).
 
 ### Supported Benchmarks for Polypheny
-* [TPC-C](./config/polypheny-{db|fram}/tpcc.xml)\
-  `./bin/oltpbenchmark -b tpcc -c ./config/polypheny/tpcc.xml --create=true --load=true --execute=true`
-* [YCSB](./config/polypheny-{db|fram}/ycsb.xml)\
-  `./bin/oltpbenchmark -b ycsb -c ./config/polypheny/ycsb.xml --create=true --load=true --execute=true`
+#### [Polypheny-DB](https://github.com/polypheny/Polypheny-DB)
+* [TPC-C](./config/polypheny-db/tpcc.xml)\
+  `./bin/oltpbenchmark -b tpcc -c ./config/polypheny-db/tpcc.xml --create=true --load=true --execute=true`
+* [TPC-H](./config/polypheny-db/tpch.xml)\
+  `./bin/oltpbenchmark -b tpch -c ./config/polypheny-db/tpch.xml --create=true --load=true --execute=true`
+* [YCSB](./config/polypheny-db/ycsb.xml)\
+  `./bin/oltpbenchmark -b ycsb -c ./config/polypheny-db/ycsb.xml --create=true --load=true --execute=true`
 
+#### [Polypheny-FRAM](https://github.com/polypheny/Polypheny-FRAM)
+* [TPC-C](./config/polypheny-fram/tpcc.xml)\
+  `./bin/oltpbenchmark -b tpcc -c ./config/polypheny-fram/tpcc.xml --create=true --load=true --execute=true`
+* [YCSB](./config/polypheny-fram/ycsb.xml)\
+  `./bin/oltpbenchmark -b ycsb -c ./config/polypheny-fram/ycsb.xml --create=true --load=true --execute=true`
+
+
+### Credits
+This fork includes and uses binaries compiled from the sources of [eyalroz/tpch-dbgen](https://github.com/eyalroz/tpch-dbgen) to generate the TPC-H data set (latest compiled commit: [23.12.2019](https://github.com/eyalroz/tpch-dbgen/commit/56f7d5765093662afb3a1aaed7f4d542eb7c0a08)).
+
+<br>
+<br>
+<br>
 
 # Original README
 
