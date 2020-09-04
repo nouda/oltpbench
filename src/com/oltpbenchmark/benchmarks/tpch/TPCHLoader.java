@@ -43,7 +43,7 @@ import com.oltpbenchmark.benchmarks.tpch.util.CopyUtil;
 import com.oltpbenchmark.types.DatabaseType;
 import org.apache.log4j.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang.SystemUtils;
 
 import com.oltpbenchmark.api.Loader;
 import com.oltpbenchmark.api.Loader.LoaderThread;
@@ -327,8 +327,10 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
                 platform = "windows";
             } else if (SystemUtils.IS_OS_MAC) {
                 platform = "macos";
-            } else {
+            } else if (SystemUtils.IS_OS_LINUX) {
                 platform = "linux";
+            } else {
+                throw new RuntimeException("Cannot run the tpch-dbgen binary on platforms other than Linux, Mac, or Windows.");
             }
 
             final URL dbgenExeUrl = TPCHLoader.class.getResource('/' + "bin" + '/' + "tpch-dbgen" + '-' + fileFormat + '.' + platform);
