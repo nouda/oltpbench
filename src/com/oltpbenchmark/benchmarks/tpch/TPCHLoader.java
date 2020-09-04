@@ -411,62 +411,24 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
             LOG.error(e.getMessage());
         }
 
-//        deactivateForeignKeyConstraints(conn);
-
-        startAndAwaitFinish( loadParts( conn ) );
-        startAndAwaitFinish( loadRegions( conn ) );
-        startAndAwaitFinish( loadNations( conn ) );
-        startAndAwaitFinish( loadCustomers( conn ) );
-        startAndAwaitFinish( loadSuppliers( conn ) );
-        startAndAwaitFinish( loadOrders( conn ) );
-        startAndAwaitFinish( loadPartSupps( conn ) );
-        startAndAwaitFinish( loadLineItems( conn ) );
-
-//        activateForeignKeyConstraints(conn);
+        startAndAwaitFinish(loadParts(conn));
+        startAndAwaitFinish(loadRegions(conn));
+        startAndAwaitFinish(loadNations(conn));
+        startAndAwaitFinish(loadCustomers(conn));
+        startAndAwaitFinish(loadSuppliers(conn));
+        startAndAwaitFinish(loadOrders(conn));
+        startAndAwaitFinish(loadPartSupps(conn));
+        startAndAwaitFinish(loadLineItems(conn));
 
         return this.totalRows;
     }
 
-
-    private void startAndAwaitFinish( Thread loader ) {
+    private void startAndAwaitFinish(Thread loader) {
         loader.start();
         try {
             loader.join();
-        } catch ( InterruptedException e ) {
-            LOG.error( e.getMessage() );
-        }
-    }
-
-    private void activateForeignKeyConstraints(Connection conn) {
-        try (Statement stmt = conn.createStatement()) {
-            switch (getDatabaseType()) {
-                case POLYPHENY:
-                    stmt.execute("SET REFERENTIAL_INTEGRITY = TRUE");
-                    break;
-                case HSQLDB:
-                    stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
-                    break;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            LOG.warn("Exception while activating foreign key constraints.");
-        }
-    }
-
-
-    private void deactivateForeignKeyConstraints(Connection conn) {
-        try (Statement stmt = conn.createStatement()) {
-            switch (getDatabaseType()) {
-                case POLYPHENY:
-                    stmt.execute("SET REFERENTIAL_INTEGRITY = FALSE");
-                    break;
-                case HSQLDB:
-                    stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
-                    break;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            LOG.warn("Exception while deactivating foreign key constraints.");
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage());
         }
     }
 
