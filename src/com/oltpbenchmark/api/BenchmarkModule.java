@@ -168,10 +168,29 @@ public abstract class BenchmarkModule {
      * @throws SQLException
      */
     public URL getDatabaseDDL(DatabaseType db_type) {
-        String[] ddlNames = {
-                this.benchmarkName + "-" + (db_type != null ? db_type.name().toLowerCase() : "") + "-ddl.sql",
-                this.benchmarkName + "-ddl.sql",
-        };
+        final String[] ddlNames;
+
+        final String overwrittenDdlName;
+        if (this.workConf == null || this.workConf.getXmlConfig() == null) {
+            overwrittenDdlName = null;
+        } else {
+            overwrittenDdlName = this.workConf.getXmlConfig().getString("ddlFileName"); /*=null if not present*/
+        }
+        
+        if (overwrittenDdlName != null
+                && overwrittenDdlName.toLowerCase().endsWith( "-ddl.sql" ) // it must end with "-ddl.sql"
+                && overwrittenDdlName.toLowerCase().startsWith(this.benchmarkName.toLowerCase() + "-" + (db_type != null ? db_type.name().toLowerCase() : "")) // it must start with "<benchmark>-<db_type>"
+        ) {
+            ddlNames = new String[] {
+                    overwrittenDdlName.toLowerCase(), // the DDL name from the config
+            };
+        } else {
+            // the old case
+            ddlNames = new String[] {
+                    this.benchmarkName + "-" + (db_type != null ? db_type.name().toLowerCase() : "") + "-ddl.sql",
+                    this.benchmarkName + "-ddl.sql",
+            };
+        }
 
         for (String ddlName : ddlNames) {
             if (ddlName == null) continue;

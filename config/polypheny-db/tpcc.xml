@@ -9,6 +9,11 @@
     <username>pa</username>
     <password></password>
 
+    <!-- Use this file present in the tpcc/ddls folder -->
+    <!-- The name needs to start with "benchmark-dbtype", here "tpcc-polypheny",
+         and end with "-ddl.sql". -->
+    <ddlFileName>tpcc-polypheny-db-ddl.sql</ddlFileName>
+
     <isolation>TRANSACTION_SERIALIZABLE</isolation>
     <batchsize>128</batchsize>
 
