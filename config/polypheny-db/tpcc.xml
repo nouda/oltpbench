@@ -10,9 +10,12 @@
     <password></password>
 
     <!-- Use this file present in the tpcc/ddls folder -->
-    <!-- The name needs to start with "benchmark-dbtype", here "tpcc-polypheny",
-         and end with "-ddl.sql". -->
+    <!-- The name needs to start with "<benchmark>-<dbtype>" and end with "-ddl.sql". -->
     <ddlFileName>tpcc-polypheny-db-ddl.sql</ddlFileName>
+
+    <!-- Use this file present in the tpcc/dialects folder -->
+    <!-- The name needs to end with "-dialects.xml". -->
+    <dialectFileName></dialectFileName>
 
     <isolation>TRANSACTION_SERIALIZABLE</isolation>
     <batchsize>128</batchsize>
@@ -27,8 +30,6 @@
             <!-- <serial>false</serial> -->
             <time>60</time>
             <rate>unlimited</rate>
-            <!--<weights>45,43,4,4,4</weights>-->
-            <!--<weights>46,44,5,5</weights> -->
             <weights>45,43,4,4,4</weights>
         </work>
     </works>

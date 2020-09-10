@@ -178,7 +178,7 @@ public abstract class BenchmarkModule {
         }
         
         if (overwrittenDdlName != null
-                && overwrittenDdlName.toLowerCase().endsWith( "-ddl.sql" ) // it must end with "-ddl.sql"
+                && overwrittenDdlName.toLowerCase().endsWith("-ddl.sql") // it must end with "-ddl.sql"
                 && overwrittenDdlName.toLowerCase().startsWith(this.benchmarkName.toLowerCase() + "-" + (db_type != null ? db_type.name().toLowerCase() : "")) // it must start with "<benchmark>-<db_type>"
         ) {
             ddlNames = new String[] {
@@ -222,16 +222,33 @@ public abstract class BenchmarkModule {
      * @return
      */
     public File getSQLDialect(DatabaseType db_type) {
+        final String[] xmlNames;
 
-        // String xmlName = this.benchmarkName + "-dialects.xml";
-        // URL ddlURL = this.getClass().getResource(xmlName);
-        String[] xmlNames = {
-                (db_type != null ? db_type.name().toLowerCase() : "") + "-dialects.xml",
+        final String overwrittenSqlDialectName;
+        if ( this.workConf == null || this.workConf.getXmlConfig() == null ) {
+            overwrittenSqlDialectName = null;
+        } else {
+            overwrittenSqlDialectName = this.workConf.getXmlConfig().getString( "dialectFileName" ); /*=null if not present*/
+        }
 
-                // TODO: We need to remove this!
-                this.benchmarkName + "-dialects.xml",
-        };
+        if (overwrittenSqlDialectName != null
+                && overwrittenSqlDialectName.toLowerCase().endsWith("-dialects.xml") // it must end with "-dialects.xml"
+        ) {
+            xmlNames = new String[] {
+                    overwrittenSqlDialectName.toLowerCase(), // the dialect xml file name from the config
+            };
+        } else {
+            // the old case
+            xmlNames = new String[]{
+                    (db_type != null ? db_type.name().toLowerCase() : "") + "-dialects.xml",
+
+                    // TODO: We need to remove this!
+                    this.benchmarkName + "-dialects.xml",
+            };
+        }
+
         for (String xmlName : xmlNames) {
+            if (xmlName == null) continue;
             URL ddlURL = this.getClass().getResource(DIALECTS_DIR + File.separator + xmlName);
             if (ddlURL == null) ddlURL = this.getClass().getResource(DIALECTS_DIR + '/' + xmlName);
             if (ddlURL != null) {
