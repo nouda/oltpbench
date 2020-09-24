@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +42,8 @@ import java.util.regex.Pattern;
 import com.oltpbenchmark.benchmarks.tpch.util.CopyUtil;
 import com.oltpbenchmark.types.DatabaseType;
 import org.apache.log4j.Logger;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.SystemUtils;
 
 import com.oltpbenchmark.api.Loader;
 import com.oltpbenchmark.api.Loader.LoaderThread;
@@ -308,30 +311,125 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
     protected long totalRows = 0;
 
     protected long loadHelper(Connection conn) {
-        Thread loaders[] = new Thread[8];
-        loaders[0] = loadCustomers(conn);
-        loaders[1] = loadLineItems(conn);
-        loaders[2] = loadNations(conn);
-        loaders[3] = loadOrders(conn);
-        loaders[4] = loadParts(conn);
-        loaders[5] = loadPartSupps(conn);
-        loaders[6] = loadRegions(conn);
-        loaders[7] = loadSuppliers(conn);
-
-        for (int i = 0; i < 8; ++i)
-            if (loaders[i] != null)
-                loaders[i].start();
-
-        for (int i = 0; i < 8; ++i) {
-            try {
-                if (loaders[i] != null)
-                    loaders[i].join();
-            } catch(InterruptedException e) {
-                LOG.error(e.getMessage());
+        Thread generator = new Thread(() -> {
+            final File workingDir = new File(workConf.getDataDir(), "sf_" + Math.min(1, Math.round(scaleFactor)));
+            if (!workingDir.exists() && !workingDir.mkdirs()) {
+                LOG.error("Creating the working directory failed!");
             }
+
+            final String fileFormat = workConf.getXmlConfig().getString("fileFormat").toLowerCase();
+            if ((!"csv".equals(fileFormat) && !"tbl".equals(fileFormat))) {
+                throw new IllegalArgumentException("Configuration does not have a valid fileFormat. Only accepted values: \"csv\" and \"tbl\".");
+            }
+
+            final String platform;
+            if (SystemUtils.IS_OS_WINDOWS) {
+                platform = "windows";
+            } else if (SystemUtils.IS_OS_MAC) {
+                platform = "macos";
+            } else if (SystemUtils.IS_OS_LINUX) {
+                platform = "linux";
+            } else {
+                throw new RuntimeException("Cannot run the tpch-dbgen binary on platforms other than Linux, Mac, or Windows.");
+            }
+
+            final URL dbgenExeUrl = TPCHLoader.class.getResource('/' + "bin" + '/' + "tpch-dbgen" + '-' + fileFormat + '.' + platform);
+            if (dbgenExeUrl == null) {
+                LOG.error("Failed to find tpch-dbgen" + '-' + fileFormat + '.' + platform);
+                return;
+            }
+            LOG.debug("Found tpch-dbgen: " + dbgenExeUrl);
+
+            final File dbgenExe;
+            try {
+                dbgenExe = new File(workConf.getDataDir(), "tpch-dbgen.exe");
+                dbgenExe.deleteOnExit();
+                FileUtils.copyInputStreamToFile(dbgenExeUrl.openStream(), dbgenExe);
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (LOG.isDebugEnabled()) {
+                    LOG.error("Failed to extract tpch-dbgen" + '-' + fileFormat + '.' + platform);
+                }
+                return;
+            }
+            if (!SystemUtils.IS_OS_WINDOWS && !dbgenExe.setExecutable(true)) {
+                LOG.error("Failed to set the executable bit");
+                return;
+            }
+
+            final URL distsDssUrl = TPCHLoader.class.getResource("tpch-distributions.dss");
+            if (distsDssUrl == null) {
+                LOG.error("Failed to find tpch-distributions.dss");
+                return;
+            }
+
+            final File distsDss;
+            try {
+                distsDss = new File(workConf.getDataDir(), "tpch-distributions.dss");
+                if (!distsDss.exists()) {
+                    FileUtils.copyInputStreamToFile(distsDssUrl.openStream(), distsDss);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                if (LOG.isDebugEnabled()) {
+                    LOG.error("Failed to extract tpch-distributions.dss");
+                }
+                return;
+            }
+
+            boolean skip = true;
+            for (final String fileName : new String[]{ "customer", "lineitem", "nation", "orders", "part", "partsupp", "region", "supplier" }) {
+                skip &= new File(workingDir, fileName + '.' + fileFormat).exists();
+            }
+
+            if (skip) {
+                LOG.info("Skipping TPC-H data generation.");
+            } else {
+                try {
+                    final Process dbgen = new ProcessBuilder()
+                            .directory(workingDir)
+                            .inheritIO()
+                            .command(dbgenExe.getAbsolutePath(), "-v", "-f", "-s", Long.toString(Math.min(1, Math.round(scaleFactor))), "-b", distsDss.getAbsolutePath())
+                            .start();
+                    final int dbgenExitValue = dbgen.waitFor();
+                    if (dbgenExitValue > 0) {
+                        LOG.warn("tpch-dbgen returned with code " + dbgenExitValue);
+                    }
+                } catch (IOException | InterruptedException e) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.error("Failed run tpch-dbgen");
+                    }
+                    return;
+                }
+            }
+        }, "tpch-dbgen (TPC-H Database Generator)");
+
+        try {
+            generator.start();
+            generator.join();
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage());
         }
 
+        startAndAwaitFinish(loadParts(conn));
+        startAndAwaitFinish(loadRegions(conn));
+        startAndAwaitFinish(loadNations(conn));
+        startAndAwaitFinish(loadCustomers(conn));
+        startAndAwaitFinish(loadSuppliers(conn));
+        startAndAwaitFinish(loadOrders(conn));
+        startAndAwaitFinish(loadPartSupps(conn));
+        startAndAwaitFinish(loadLineItems(conn));
+
         return this.totalRows;
+    }
+
+    private void startAndAwaitFinish(Thread loader) {
+        loader.start();
+        try {
+            loader.join();
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage());
+        }
     }
 
     private class TableLoader implements Runnable {
@@ -414,7 +512,7 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
                     now = new java.util.Date();
                     LOG.debug("\nStart " + tableName + " load @ " + now + "...");
                     String format = getFileFormat();
-                    File file = new File(workConf.getDataDir()
+                    File file = new File(new File(workConf.getDataDir(), "sf_" + Math.min(1, Math.round(scaleFactor)))
                                          , tableName.toLowerCase() + "." 
                                                  + format);
                     br = new BufferedReader(new FileReader(file));
@@ -539,7 +637,7 @@ public class TPCHLoader extends Loader<TPCHBenchmark> {
                 } catch (SQLException se) {
                     LOG.debug(se.getMessage());
                     se = se.getNextException();
-                    LOG.debug(se.getMessage());
+                    if (se != null) LOG.debug(se.getMessage());
                     conn.rollback();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
