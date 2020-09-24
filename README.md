@@ -17,6 +17,8 @@ Please consult the documentation of the original repository on how to further us
 
 ### Supported Benchmarks for Polypheny
 #### [Polypheny-DB](https://github.com/polypheny/Polypheny-DB)
+* [SmallBank](./config/polypheny-db/smallbank.xml)\
+  `./bin/oltpbenchmark -b smallbank -c ./config/polypheny-db/smallbank.xml --create=true --load=true --execute=true`
 * [TPC-C](./config/polypheny-db/tpcc.xml)\
   `./bin/oltpbenchmark -b tpcc -c ./config/polypheny-db/tpcc.xml --create=true --load=true --execute=true`
 * [TPC-H](./config/polypheny-db/tpch.xml)\
@@ -25,6 +27,8 @@ Please consult the documentation of the original repository on how to further us
   `./bin/oltpbenchmark -b ycsb -c ./config/polypheny-db/ycsb.xml --create=true --load=true --execute=true`
 
 #### [Polypheny-FRAM](https://github.com/polypheny/Polypheny-FRAM)
+* [SmallBank](./config/polypheny-fram/smallbank.xml)\
+  `./bin/oltpbenchmark -b smallbank -c ./config/polypheny-fram/smallbank.xml --create=true --load=true --execute=true`
 * [TPC-C](./config/polypheny-fram/tpcc.xml)\
   `./bin/oltpbenchmark -b tpcc -c ./config/polypheny-fram/tpcc.xml --create=true --load=true --execute=true`
 * [YCSB](./config/polypheny-fram/ycsb.xml)\
